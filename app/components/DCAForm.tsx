@@ -64,7 +64,7 @@ export default function DCAForm() {
         const data = await response.json();
         
         // Transform CoinGecko format to our Token type
-        const fetchedTokens: Token[] = data.tokens.map((t: any) => ({
+        const fetchedTokens: Token[] = data.tokens.map((t: { symbol: string; name: string; logoURI: string; address: string; decimals: number }) => ({
           symbol: t.symbol,
           name: t.name,
           image: t.logoURI,
@@ -84,7 +84,7 @@ export default function DCAForm() {
   }, []);
 
   const filteredTokens = useMemo(() => {
-    let tokensToSearch = allTokens.length > 0 ? allTokens : PINNED_TOKENS;
+    const tokensToSearch = allTokens.length > 0 ? allTokens : PINNED_TOKENS;
 
     // If no search query, prioritize PINNED_TOKENS at the top, then show others
     if (!searchQuery) {
@@ -119,6 +119,20 @@ export default function DCAForm() {
     setIsModalOpen(false);
   };
 
+  // Toast State
+  const [toast, setToast] = useState<{show: boolean, msg: string}>({ show: false, msg: "" });
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => setToast({ show: false, msg: "" }), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
+
+  const showToastMsg = (msg: string) => {
+    setToast({ show: true, msg });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -137,15 +151,18 @@ export default function DCAForm() {
       setPlans((prev) => [newPlan, ...prev]);
       setActiveTab("list"); // Switch to list view
       setIsLoading(false);
-      // Reset form defaults if needed, but keeping them is often better UX
+      showToastMsg(`🚀 Invested ${amount} ${currency.symbol} in ${targetToken.symbol}`);
     }, 1000);
   };
 
   const handleCancelPlan = (id: string) => {
     if (confirm("Are you sure you want to cancel this DCA plan?")) {
       setPlans((prev) => prev.filter((p) => p.id !== id));
+      showToastMsg("Plan cancelled successfully");
     }
   };
+
+  const totalInvested = plans.reduce((acc, plan) => acc + parseFloat(plan.amount), 0);
 
   return (
     <>
@@ -266,6 +283,20 @@ export default function DCAForm() {
           {/* My Plans List */}
           {activeTab === "list" && (
             <div className={styles.planList} style={{ height: "100%" }}>
+              
+              {/* Portfolio Stats Card */}
+              {plans.length > 0 && (
+                <div className={styles.statsCard}>
+                  <div>
+                    <div className={styles.statsLabel}>Total Monthly Invest</div>
+                    <div className={styles.statsValue}>${totalInvested.toLocaleString()}</div>
+                  </div>
+                  <div className={styles.statsTrend}>
+                    +12.5% 📈
+                  </div>
+                </div>
+              )}
+
               {plans.length === 0 ? (
                 <div className={styles.emptyState} style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
                   <div style={{fontSize: "2rem", marginBottom: "12px"}}>charts</div>
@@ -279,7 +310,7 @@ export default function DCAForm() {
                     <div className={styles.planCardRow}>
                       <div className={styles.planTokenInfo}>
                         {plan.target.image ? (
-                          <img src={plan.target.image} width={32} height={32} style={{borderRadius:"50%"}} />
+                          <img src={plan.target.image} alt={plan.target.symbol} width={32} height={32} style={{borderRadius:"50%"}} />
                         ) : (
                           <div style={{width:32, height:32, background:"#333", borderRadius:"50%"}} />
                         )}
@@ -307,6 +338,14 @@ export default function DCAForm() {
           )}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={styles.toast}>
+          <span>✅</span>
+          {toast.msg}
+        </div>
+      )}
 
       {/* Token Selection Modal */}
       {isModalOpen && (

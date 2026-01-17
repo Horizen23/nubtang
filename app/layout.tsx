@@ -18,6 +18,9 @@ export async function generateMetadata(): Promise<Metadata> {
           action: {
             name: `Launch ${minikitConfig.miniapp.name}`,
             type: "launch_miniapp",
+            url: minikitConfig.miniapp.homeUrl,
+            splashImageUrl: minikitConfig.miniapp.splashImageUrl,
+            splashBackgroundColor: minikitConfig.miniapp.splashBackgroundColor,
           },
         },
       }),

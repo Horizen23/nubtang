@@ -29,7 +29,7 @@ export const minikitConfig = {
     homeUrl: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "finance",
-    tags: ["defi", "investment", "dca"],
+    tags: ["defi", "investment", "dca", "miniapp", "baseapp"],
     heroImageUrl: `${ROOT_URL}/hero.png`,
     tagline: "Accumulate Wealth Effortlessly",
     ogTitle: "Nubtang - Crypto Auto-Invest",

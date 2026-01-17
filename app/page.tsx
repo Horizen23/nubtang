@@ -27,6 +27,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.headerWrapper}>
+        <meta name="base:app_id" content="696af6c4c0ab25addaaaf1b9" />
         <Wallet />
       </header>
 
